@@ -7,6 +7,7 @@ from sklearn.metrics import f1_score
 from sklearn.svm import SVC
 import optuna
 import xgboost as xgb
+import pickle
 
 
 def create_dataset():
@@ -34,7 +35,7 @@ def logistic_regression(tuned_hyper_params):
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     f1 = f1_score(y_test, y_pred)
-    return f1
+    return f1, model
 
 def objective_log_reg(trial):
     C = trial.suggest_loguniform('C', 1e-5, 1e5)
@@ -61,7 +62,7 @@ def svc(tuned_hyper_params):
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     f1 = f1_score(y_test, y_pred)
-    return f1
+    return f1, model
 
 
 def objective_xgboost(trial):
@@ -104,23 +105,23 @@ def xgboost(best_params):
      y_pred = model.predict(dtest)
      y_pred_binary = [1 if p > 0.5 else 0 for p in y_pred]
      f1 = f1_score(y_test, y_pred_binary)
-     return f1
+     return f1, model
 
 dataset = create_dataset()
-X_train, X_test, y_train, y_test = model_data(dataset, "long")
+X_train, X_test, y_train, y_test = model_data(dataset, "short")
 
-logistic_regression_study = optuna.create_study(direction='maximize')
-logistic_regression_study.optimize(objective_log_reg, n_trials=10)
-f1_log_reg = logistic_regression(logistic_regression_study.best_params)    
+#logistic_regression_study = optuna.create_study(direction='maximize')
+#logistic_regression_study.optimize(objective_log_reg, n_trials=10)
+#f1_log_reg, log_model = logistic_regression(logistic_regression_study.best_params)    
 
 #svc_study = optuna.create_study(direction='maximize')
 #svc_study.optimize(objective_svc, n_trials=2)
-#f1_svc = svc(svc_study.best_params)  
+#f1_svc, svc_model = svc(svc_study.best_params)  
 
-xg_study = optuna.create_study(direction='maximize')
-xg_study.optimize(objective_xgboost, n_trials=5)
-f1_xg = xgboost(xg_study.best_params)  
+#xg_study = optuna.create_study(direction='maximize')
+#xg_study.optimize(objective_xgboost, n_trials=5)
+#f1_xg, xg_model = xgboost(xg_study.best_params)  
 
-print("Logistic regression F1 Score:" + str(f1_log_reg))
-#print("SVC F1 Score:" + str(f1_svc))
-print("XG  Boost F1 Score:" + str(f1_xg))
+#Guardar modelos con pickle
+#with open('modelo_regresion_logistica.pkl', 'wb') as file:
+    #pickle.dump(log_model, file)
