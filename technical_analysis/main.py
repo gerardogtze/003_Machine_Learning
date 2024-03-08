@@ -1,7 +1,7 @@
 import numpy as np
 from typing import List
 
-from strategies import gen_signals
+from Strategies import gen_signals
 
 
 class Order:
