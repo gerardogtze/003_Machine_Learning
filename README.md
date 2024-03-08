@@ -2,7 +2,7 @@ El objetivo de este repositorio es mostrar el desarrollo organizado del proyecto
 
 El proyecto cuenta con los siguientes archivos:
 
-*.vscode
+.vscode
 data
 machine learning
 technical_analysis
