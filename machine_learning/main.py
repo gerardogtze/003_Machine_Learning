@@ -11,7 +11,7 @@ import pickle
 
 
 def create_dataset():
-    df = pd.read_csv("../data/aapl_1d_train.csv")
+    df = pd.read_csv("../data/aapl_5m_train.csv")
     df[f'T_Minus_1'] = df['Close'].shift(1)
     df[f'T_Minus_2'] = df['Close'].shift(2)
     df[f'T_Minus_3'] = df['Close'].shift(3)
@@ -26,12 +26,11 @@ def model_data(df, trade):
     if trade == "short":
         y = df['Close'] > df['T_Plus_5']
     
-    X_train, X_test, y_train, y_test = train_test_split(x, y, test_size = 0.2, random_state = 55)
+    X_train, X_test, y_train, y_test = train_test_split(x, y, test_size = 0.2, random_state = 1, shuffle=False)
     return X_train, X_test, y_train, y_test
 
-
 def logistic_regression(tuned_hyper_params):
-    model = LogisticRegression(random_state = 55, C=tuned_hyper_params["C"],fit_intercept=tuned_hyper_params["fit_intercept"], l1_ratio=tuned_hyper_params["l1_ratio"])
+    model = LogisticRegression(random_state = 20, C=tuned_hyper_params["C"],fit_intercept=tuned_hyper_params["fit_intercept"], l1_ratio=tuned_hyper_params["l1_ratio"])
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     f1 = f1_score(y_test, y_pred)
@@ -41,7 +40,7 @@ def objective_log_reg(trial):
     C = trial.suggest_loguniform('C', 1e-5, 1e5)
     fit_intercept = trial.suggest_categorical('fit_intercept', [True, False])
     l1_ratio = trial.suggest_uniform('l1_ratio', 0, 1)
-    model = LogisticRegression(C=C,fit_intercept=fit_intercept,l1_ratio=l1_ratio,random_state=55)
+    model = LogisticRegression(C=C,fit_intercept=fit_intercept,l1_ratio=l1_ratio,random_state=20)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     f1 = f1_score(y_test, y_pred)
@@ -51,19 +50,18 @@ def objective_svc(trial):
     C = trial.suggest_loguniform('C', 1e-5, 1e5)
     kernel = trial.suggest_categorical('kernel', ['linear', 'rbf', 'poly', 'sigmoid'])
     gamma = trial.suggest_loguniform('gamma', 1e-5, 1e1)
-    svc_model = SVC(kernel=kernel, C=C, gamma=gamma, random_state=55)
+    svc_model = SVC(kernel=kernel, C=C, gamma=gamma, random_state=56, max_iter=2_000)
     svc_model.fit(X_train, y_train)
     y_pred = svc_model.predict(X_test)
     f1 = f1_score(y_test, y_pred)
     return f1
 
 def svc(tuned_hyper_params):
-    model = SVC(random_state = 55, max_iter=100, C=tuned_hyper_params["C"],gamma=tuned_hyper_params["gamma"], kernel=tuned_hyper_params["kernel"])
+    model = SVC(random_state = 56, max_iter=2_000, C=tuned_hyper_params["C"], gamma=tuned_hyper_params["gamma"], kernel=tuned_hyper_params["kernel"])
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     f1 = f1_score(y_test, y_pred)
     return f1, model
-
 
 def objective_xgboost(trial):
      params = {
@@ -112,16 +110,18 @@ X_train, X_test, y_train, y_test = model_data(dataset, "short")
 
 #logistic_regression_study = optuna.create_study(direction='maximize')
 #logistic_regression_study.optimize(objective_log_reg, n_trials=10)
-#f1_log_reg, log_model = logistic_regression(logistic_regression_study.best_params)    
+#f1_log_reg, log_model = logistic_regression(logistic_regression_study.best_params)
 
-#svc_study = optuna.create_study(direction='maximize')
-#svc_study.optimize(objective_svc, n_trials=2)
-#f1_svc, svc_model = svc(svc_study.best_params)  
+svc_study = optuna.create_study(direction='maximize')
+svc_study.optimize(objective_svc, n_trials=10)
+f1_svc, svc_model = svc(svc_study.best_params)
 
 #xg_study = optuna.create_study(direction='maximize')
-#xg_study.optimize(objective_xgboost, n_trials=5)
+#xg_study.optimize(objective_xgboost, n_trials=50)
 #f1_xg, xg_model = xgboost(xg_study.best_params)  
 
+print(f1_svc)
+
 #Guardar modelos con pickle
-#with open('modelo_regresion_logistica.pkl', 'wb') as file:
-    #pickle.dump(log_model, file)
+with open('modelo_svc_5m_short.pkl', 'wb') as file:
+    pickle.dump(svc_model, file)
