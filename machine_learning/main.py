@@ -9,7 +9,7 @@ import optuna
 import xgboost as xgb
 import pickle
 
-
+# Crear Dataset
 def create_dataset():
     df = pd.read_csv("../data/aapl_5m_train.csv")
     df[f'T_Minus_1'] = df['Close'].shift(1)
@@ -29,6 +29,7 @@ def model_data(df, trade):
     X_train, X_test, y_train, y_test = train_test_split(x, y, test_size = 0.2, random_state = 1, shuffle=False)
     return X_train, X_test, y_train, y_test
 
+# Función regresión logística
 def logistic_regression(tuned_hyper_params):
     model = LogisticRegression(random_state = 20, C=tuned_hyper_params["C"],fit_intercept=tuned_hyper_params["fit_intercept"], l1_ratio=tuned_hyper_params["l1_ratio"])
     model.fit(X_train, y_train)
