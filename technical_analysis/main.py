@@ -5,10 +5,10 @@ import ta
 from Indicators import calcular_macd,calcular_sma,calcular_rsi,calcular_bbands
 
 # Cargar datos de entrenamiento desde el archivo CSV
-train_data = pd.read_csv('C:/Users/Santiago/Desktop/ITESO/9no Semestre/Microestructuras de Trading/002TechnicalAnalysis/files/aapl_5m_train.csv')
+train_data = pd.read_csv('../data/aapl_5m_train.csv')
 
 # Cargar datos de validación desde el archivo CSV
-validation_data = pd.read_csv('C:/Users/Santiago/Desktop/ITESO/9no Semestre/Microestructuras de Trading/002TechnicalAnalysis/files/aapl_5m_validation.csv')
+validation_data = pd.read_csv('../data/aapl_5m_test.csv')
 
 
 calcular_macd(train_data,train_data.Close)
