@@ -1,0 +1,12 @@
+Para poder correr este proyecto es necesario tener instalado:
+
+pandas as pd
+numpy as np
+sklearn import datasets
+sklearn.model_selection import train_test_split
+sklearn.linear_model import LogisticRegression
+sklearn.metrics import f1_score
+sklearn.svm import SVC
+optuna
+xgboost as xgb
+pickle
